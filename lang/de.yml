@@ -1,0 +1,4 @@
+de:
+  WebbuildersGroup\Turnstile\Forms\TurnstileField:
+    NOSCRIPT: "Sie müssen JavaScript aktivieren um dieses Formular zu übermitteln"
+    VALIDATE_ERROR: "Spam-Schutz konnte nicht geprüft werden"

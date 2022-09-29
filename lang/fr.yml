@@ -1,0 +1,4 @@
+fr:
+  WebbuildersGroup\Turnstile\Forms\TurnstileField:
+    NOSCRIPT: "Vous devez activer JavaScript pour soumettre ce formulaire"
+    VALIDATE_ERROR: "Captcha n'a pas pu être validé"
