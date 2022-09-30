@@ -37,52 +37,24 @@ If you want to add a field label or help text to the Captcha field you can do so
 
 ```php
 $form->enableSpamProtection()
-    ->fields()
-    ->fieldByName('Captcha')
-        ->setTitle('Spam protection')
-        ->setDescription('Your description here');
+    ->Fields()
+      ->fieldByName('Captcha')
+          ->setTitle('Spam protection')
+          ->setDescription('Your description here');
 ```
 
 
+## Adding Custom Attributes
+Turnstile has a [few other options](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/#configurations) that this module does not out of the box provide hooks for setting, however you can set them your self using `setAttribute` for example:
 
-## Handling form submission
-By default, the javascript included with this module will add a submit event handler to your form.
-
-If you need to handle form submissions in a special way (for example to support front-end validation), you can choose to handle form submit events yourself.
-
-This can be configured site-wide using the Config API
-```yml
-WebbuildersGroup\Turnstile\Forms\TurnstileField:
-  default_handle_submit: false
-```
-
-Or on a per form basis:
 ```php
-$captchaField = $form->Fields()->fieldByName('Captcha');
-$captchaField->setHandleSubmitEvents(false);
-```
-
-With this configuration no event handlers will be added by this module to your form. Instead, a
-function will be provided called `turnstile_handleCaptcha` which you can call from your code
-when you're ready to submit your form. It has the following signature:
-```js
-function turnstile_handleCaptcha(form, callback)
-```
-`form` must be the form element, and `callback` should be a function that finally submits the form, though it is optional.
-
-In the simplest case, you can use it like this:
-```js
-document.addEventListener("DOMContentLoaded", function(event) {
-    // where formID is the element ID for your form
-    const form = document.getElementById(formID);
-    const submitListener = function(event) {
-        event.preventDefault();
-        let valid = true;
-        /* Your validation logic here */
-        if (valid) {
-            turnstile_handleCaptcha(form, form.submit.bind(form));
-        }
-    };
-    form.addEventListener('submit', submitListener);
-});
+$form->enableSpamProtection()
+    ->Fields()
+      ->fieldByName('Captcha')
+          ->setAttribute('data-action', 'action')
+          ->setAttribute('data-cdata', 'action')
+          ->setAttribute('data-callback', 'yourChallengeJSCallback')
+          ->setAttribute('data-expired-callback', 'yourExpiredJSCallback')
+          ->setAttribute('data-error-callback', 'youErrorJSCallback')
+          ->setAttribute('data-tabindex', 0);
 ```

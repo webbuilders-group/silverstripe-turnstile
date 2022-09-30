@@ -61,21 +61,13 @@ class TurnstileField extends FormField
     private static $default_theme = 'light';
 
     /**
-     * Whether form submit events are handled directly by this module.
-     * If false, a function is provided that can be called by user code submit handlers.
-     * @var bool
-     * @default true
-     */
-    private static $default_handle_submit = true;
-
-    /**
      * The verification response
      * @var array
      */
     protected $verifyResponse;
 
     private $_theme;
-    private $handleSubmitEvents;
+
 
     /**
      * Creates a new Recaptcha 2 field.
@@ -88,9 +80,7 @@ class TurnstileField extends FormField
         parent::__construct($name, $title, $value);
 
         $this->title = $title;
-
         $this->_theme = $this->config()->default_theme;
-        $this->handleSubmitEvents = $this->config()->default_handle_submit;
     }
 
     /**
@@ -107,43 +97,31 @@ class TurnstileField extends FormField
             user_error('You must configure ' . TurnstileField::class . '.site_key and ' . TurnstileField::class . '.secret_key, you can retrieve these at https://google.com/recaptcha', E_USER_ERROR);
         }
 
-        $this->configureRequirements();
+
+        Requirements::javascript(
+            'https://challenges.cloudflare.com/turnstile/v0/api.js?hl=' . Locale::getPrimaryLanguage(i18n::get_locale()),
+            [
+                'async' => true,
+                'defer' => true,
+            ]
+        );
 
         return parent::Field($properties);
     }
 
     /**
-     * Configure any javascript and css requirements
+     * Gets the attributes with data-sitekey and data-theme added as attributes
+     * @return array
      */
-    protected function configureRequirements()
+    public function getAttributes()
     {
-        Requirements::customScript(
-            "(function() {\n" .
-                "var cf = document.createElement('script'); cf.type = 'text/javascript'; cf.async = true; cf.defer = true;\n" .
-                "cf.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?hl=" .
-                Locale::getPrimaryLanguage(i18n::get_locale()) .
-                "&onload=turnstileFieldRender';\n" .
-                "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(cf, s);\n" .
-            "})();\n",
-            'TurnstileField-lib'
+        return array_merge(
+            parent::getAttributes(),
+            [
+                'data-sitekey'  => $this->getSiteKey(),
+                'data-theme' => $this->getTheme(),
+            ]
         );
-
-        if ($this->getHandleSubmitEvents()) {
-            $exemptActionsString = implode("' , '", $this->getForm()->getValidationExemptActions());
-            Requirements::javascript('webbuilders-group/silverstripe-turnstile: javascript/TurnstileField.js');
-            Requirements::customScript(
-                "var _turnstileFields = _turnstileFields || [];_turnstileFields.push('" . $this->ID() . "');" .
-                "var _turnstileValidationExemptActions = _turnstileValidationExemptActions || [];" .
-                "_turnstileValidationExemptActions.push('" . $exemptActionsString . "');",
-                "TurnstileField-" . $this->ID()
-            );
-        } else {
-            Requirements::customScript(
-                "var _turnstileFields = _turnstileFields || [];_turnstileFields.push('" . $this->ID() . "');",
-                "TurnstileField-" . $this->ID()
-            );
-            Requirements::javascript('webbuilders-group/silverstripe-turnstile: javascript/TurnstileField_noHandler.js');
-        }
     }
 
     /**
@@ -223,26 +201,6 @@ class TurnstileField extends FormField
     }
 
     /**
-     * Sets whether form submit events are handled directly by this module.
-     * @param bool $value
-     * @return TurnstileField
-     */
-    public function setHandleSubmitEvents(bool $value)
-    {
-        $this->handleSubmitEvents = $value;
-        return $this;
-    }
-
-    /**
-     * Get whether form submit events are handled directly by this module.
-     * @return bool
-     */
-    public function getHandleSubmitEvents(): bool
-    {
-        return $this->handleSubmitEvents;
-    }
-
-    /**
      * Sets the theme for this captcha
      * @param string $value Theme to set it to, currently the api supports light and dark
      * @return TurnstileField
@@ -252,33 +210,6 @@ class TurnstileField extends FormField
         $this->_theme = $value;
 
         return $this;
-    }
-
-    /**
-     * Gets the theme for this captcha
-     * @return string
-     */
-    public function getTheme()
-    {
-        return $this->_theme;
-    }
-
-    /**
-     * Gets the site key configured via TurnstileField.site_key this is used in the template
-     * @return string
-     */
-    public function getSiteKey()
-    {
-        return ($this->_sitekey ? $this->_sitekey : Injector::inst()->convertServiceProperty($this->config()->site_key));
-    }
-
-    /**
-     * Gets the form's id
-     * @return string
-     */
-    public function getFormID()
-    {
-        return ($this->form ? $this->getTemplateHelper()->generateFormID($this->form) : null);
     }
 
     /**
