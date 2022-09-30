@@ -25,7 +25,7 @@ WebbuildersGroup\Turnstile\Forms\TurnstileField:
   secret_key: '`TURNSTILE_SECRET_KEY`' #Your secret key (required)
   verify_ssl: true #Allows you to disable php-curl's SSL peer verification by setting this to false (optional, defaults to true)
   default_theme: "light" #Default theme color (optional, light, dark or auto, defaults to light)
-  default_handle_submit: true #Default setting for whether Turnstile should handle form submission. See "Handling form submission" below.
+  js_onload_callback: null #Onload callback to be called when the JS for Turnstile is loaded
   proxy_server: "`SS_OUTBOUND_PROXY_SERVER`" #Your proxy server address (optional)
   proxy_port: "`SS_OUTBOUND_PROXY_PORT`" #Your proxy server address port (optional)
   proxy_auth: "`SS_OUTBOUND_PROXY_AUTH`" #Your proxy server authentication information (optional)

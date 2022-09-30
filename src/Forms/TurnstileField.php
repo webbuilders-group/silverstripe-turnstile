@@ -55,10 +55,17 @@ class TurnstileField extends FormField
 
     /**
      * Captcha theme, currently options are light and dark
+     * @config WebbuildersGroup\Turnstile\Forms\TurnstileField.default_theme
      * @var string
      * @default light
      */
     private static $default_theme = 'light';
+
+    /**
+     * Onload callback to be called when the JS for Turnstile is loaded
+     * @var string
+     */
+    private static $js_onload_callback = null;
 
     /**
      * The verification response
@@ -90,7 +97,7 @@ class TurnstileField extends FormField
      */
     public function Field($properties = [])
     {
-        $siteKey = $this->getSiteKey();
+        $siteKey = Injector::inst()->convertServiceProperty($this->config()->site_key);
         $secretKey = Injector::inst()->convertServiceProperty($this->config()->secret_key);
 
         if (empty($siteKey) || empty($secretKey)) {
@@ -99,7 +106,7 @@ class TurnstileField extends FormField
 
 
         Requirements::javascript(
-            'https://challenges.cloudflare.com/turnstile/v0/api.js?hl=' . Locale::getPrimaryLanguage(i18n::get_locale()),
+            'https://challenges.cloudflare.com/turnstile/v0/api.js?hl=' . Locale::getPrimaryLanguage(i18n::get_locale()) . ($this->config()->js_onload_callback ? '&onload=' . $this->config()->js_onload_callback : ''),
             [
                 'async' => true,
                 'defer' => true,
@@ -118,8 +125,8 @@ class TurnstileField extends FormField
         return array_merge(
             parent::getAttributes(),
             [
-                'data-sitekey'  => $this->getSiteKey(),
-                'data-theme' => $this->getTheme(),
+                'data-sitekey'  => Injector::inst()->convertServiceProperty($this->config()->site_key),
+                'data-theme' => $this->_theme,
             ]
         );
     }
