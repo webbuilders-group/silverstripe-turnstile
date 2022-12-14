@@ -20,6 +20,9 @@ composer require webbuilders-group/silverstripe-turnstile
 There are multiple configuration options for the field, you must set the site_key and the secret_key which you can get from [Cloudflare](https://www.cloudflare.com/lp/turnstile/)/. These configuration options must be added to your site's yaml config typically this is `app/\_config/config.yml`.
 
 ```yml
+SilverStripe\SpamProtection\Extension\FormSpamProtectionExtension:
+  default_spam_protector: WebbuildersGroup\Turnstile\Forms\TurnstileProtector  #Set the default spam protector
+
 WebbuildersGroup\Turnstile\Forms\TurnstileField:
   site_key: '`TURNSTILE_SITE_KEY`' #Your site key (required)
   secret_key: '`TURNSTILE_SECRET_KEY`' #Your secret key (required)
