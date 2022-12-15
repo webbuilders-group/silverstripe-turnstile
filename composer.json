@@ -25,10 +25,5 @@
         "psr-4": {
             "WebbuildersGroup\\Turnstile\\": "src/"
         }
-    },
-    "extra": {
-        "expose": [
-            "javascript"
-        ]
     }
 }
