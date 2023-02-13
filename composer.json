@@ -12,8 +12,8 @@
         }
     ],
     "require": {
-        "silverstripe/framework": "~4.0",
-        "silverstripe/spamprotection": "~3.0"
+        "silverstripe/framework": ">=4.0,<6.0",
+        "silverstripe/spamprotection": ">=3.0,<5.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "~3.4"
