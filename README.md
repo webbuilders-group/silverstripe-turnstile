@@ -6,8 +6,8 @@ Adds a "spam protection" field to SilverStripe userforms using Cloudflare's [Tur
 * Ed Chipman ([UndefinedOffset](https://github.com/UndefinedOffset))
 
 ## Requirements
-* [Silverstripe Framework](https://github.com/silverstripe/silverstripe-framework) 4.0+
-* [silverstripe/spamprotection](https://github.com/silverstripe/silverstripe-spamprotection) 3.0+
+* [Silverstripe Framework](https://github.com/silverstripe/silverstripe-framework) ~4.0 or ~5.0
+* [silverstripe/spamprotection](https://github.com/silverstripe/silverstripe-spamprotection) ~3.0 or ~4.0
 
 
 ## Installation
