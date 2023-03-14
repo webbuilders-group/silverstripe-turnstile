@@ -190,7 +190,7 @@ class TurnstileField extends FormField
         if (is_array($response)) {
             $this->verifyResponse = $response;
 
-            if (array_key_exists('success', $response) && $response['success'] == false) {
+            if (!array_key_exists('success', $response) || $response['success'] == false) {
                 $validator->validationError($this->name, _t(TurnstileField::class . '.VALIDATE_ERROR', '_Captcha could not be validated'), 'validation');
                 return false;
             }
