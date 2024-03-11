@@ -140,25 +140,14 @@ class TurnstileField extends FormField
         );
     }
 
-    /**
-     * Validates the captcha against the Recaptcha API
-     * @param Validator $validator Validator to send errors to
-     * @return bool Returns boolean true if valid false if not
-     */
-    public function validate($validator)
+    public function getVerifyResponse()
     {
+        if($this->verifyResponse) {
+            return  $this->verifyResponse;
+        }
+
         $request = Controller::curr()->getRequest();
         $turnstileResponse = $request->requestVar('cf-turnstile-response');
-
-        if (!isset($turnstileResponse)) {
-            $validator->validationError(
-                $this->name,
-                _t(TurnstileField::class . '.NOSCRIPT', '_"You must enable JavaScript to submit this form'),
-                'validation'
-            );
-
-            return false;
-        }
 
         if (!function_exists('curl_init')) {
             user_error('You must enable php-curl to use this field', E_USER_ERROR);
@@ -200,14 +189,38 @@ class TurnstileField extends FormField
         curl_setopt($ch, CURLOPT_USERAGENT, 'Silverstripe ' . LeftAndMain::singleton()->getVersionProvider()->getVersion());
 
         $response = json_decode(curl_exec($ch), true);
+        $this->verifyResponse = $response;
+
+        return $this->verifyResponse;
+    }
+    /**
+     * Validates the captcha against the Recaptcha API
+     * @param Validator $validator Validator to send errors to
+     * @return bool Returns boolean true if valid false if not
+     */
+    public function validate($validator)
+    {
+        $request = Controller::curr()->getRequest();
+        $turnstileResponse = $request->requestVar('cf-turnstile-response');
+
+        if (!isset($turnstileResponse)) {
+            $validator->validationError(
+                $this->name,
+                _t(TurnstileField::class . '.NOSCRIPT', '_"You must enable JavaScript to submit this form'),
+                'validation'
+            );
+
+            return false;
+        }
+
+
         $error = _t(TurnstileField::class . '.VALIDATE_ERROR', '_Captcha could not be validated');
+        $response = $this->getVerifyResponse();
 
         if (is_array($response)) {
-            $this->verifyResponse = $response;
-
             if (!array_key_exists('success', $response) || $response['success'] == false) {
                 if (isset($response['error-codes']) && is_array($response['error-codes'])) {
-                    $error .= implode(' ', $response['error-codes']);
+                    $error .= ' '.implode(' ', $response['error-codes']);
                 }
 
                 $validator->validationError($this->name, $error, 'validation');
@@ -239,13 +252,5 @@ class TurnstileField extends FormField
         $this->_theme = $value;
 
         return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getVerifyResponse()
-    {
-        return $this->verifyResponse;
     }
 }
