@@ -8,7 +8,6 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\FormField;
 use SilverStripe\View\Requirements;
-use Locale;
 
 class TurnstileField extends FormField
 {
@@ -134,6 +133,7 @@ class TurnstileField extends FormField
         return array_merge(
             parent::getAttributes(),
             [
+                'class' => ($this->config()->disable_js || $this->config()->js_onload_callback) ? 'js-turnstile' : 'cf-turnstile',
                 'data-sitekey'  => Injector::inst()->convertServiceProperty($this->config()->site_key),
                 'data-theme' => $this->_theme,
             ]
