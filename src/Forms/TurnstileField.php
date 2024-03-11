@@ -1,4 +1,5 @@
 <?php
+
 namespace WebbuildersGroup\Turnstile\Forms;
 
 use Psr\Log\LoggerInterface;
@@ -6,7 +7,6 @@ use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\FormField;
-use SilverStripe\i18n\i18n;
 use SilverStripe\View\Requirements;
 use Locale;
 
@@ -23,6 +23,8 @@ class TurnstileField extends FormField
      * @config WebbuildersGroup\Turnstile\Forms\TurnstileField.secret_key
      */
     private static $secret_key;
+
+    private static $disable_js;
 
     /**
      * CURL Proxy Server location
@@ -101,17 +103,24 @@ class TurnstileField extends FormField
         $secretKey = Injector::inst()->convertServiceProperty($this->config()->secret_key);
 
         if (empty($siteKey) || empty($secretKey)) {
-            user_error('You must configure ' . TurnstileField::class . '.site_key and ' . TurnstileField::class . '.secret_key, you can retrieve these at https://google.com/recaptcha', E_USER_ERROR);
+            user_error(
+                'You must configure ' . TurnstileField::class . '.site_key and '
+                . TurnstileField::class . '.secret_key, you can retrieve these at https://dash.cloudflare.com/?to=/:account/turnstile',
+                E_USER_ERROR
+            );
         }
 
 
-        Requirements::javascript(
-            'https://challenges.cloudflare.com/turnstile/v0/api.js?hl=' . Locale::getPrimaryLanguage(i18n::get_locale()) . ($this->config()->js_onload_callback ? '&onload=' . $this->config()->js_onload_callback : ''),
-            [
+        if (!$this->config()->disable_js) {
+            Requirements::javascript(
+                'https://challenges.cloudflare.com/turnstile/v0/api.js?'
+                    . ($this->config()->js_onload_callback ? '&onload=' . $this->config()->js_onload_callback : ''),
+                [
                 'async' => true,
                 'defer' => true,
             ]
-        );
+            );
+        }
 
         return parent::Field($properties);
     }
@@ -142,7 +151,12 @@ class TurnstileField extends FormField
         $turnstileResponse = $request->requestVar('cf-turnstile-response');
 
         if (!isset($turnstileResponse)) {
-            $validator->validationError($this->name, _t(TurnstileField::class . '.NOSCRIPT', '_"You must enable JavaScript to submit this form'), 'validation');
+            $validator->validationError(
+                $this->name,
+                _t(TurnstileField::class . '.NOSCRIPT', '_"You must enable JavaScript to submit this form'),
+                'validation'
+            );
+
             return false;
         }
 
@@ -186,20 +200,28 @@ class TurnstileField extends FormField
         curl_setopt($ch, CURLOPT_USERAGENT, 'Silverstripe ' . LeftAndMain::singleton()->getVersionProvider()->getVersion());
 
         $response = json_decode(curl_exec($ch), true);
+        $error = _t(TurnstileField::class . '.VALIDATE_ERROR', '_Captcha could not be validated');
 
         if (is_array($response)) {
             $this->verifyResponse = $response;
 
             if (!array_key_exists('success', $response) || $response['success'] == false) {
-                $validator->validationError($this->name, _t(TurnstileField::class . '.VALIDATE_ERROR', '_Captcha could not be validated'), 'validation');
+                if (isset($response['error-codes']) && is_array($response['error-codes'])) {
+                    $error .= implode(' ', $response['error-codes']);
+                }
+
+                $validator->validationError($this->name, $error, 'validation');
+
                 return false;
             }
         } else {
-            $validator->validationError($this->name, _t(TurnstileField::class . '.VALIDATE_ERROR', '_Captcha could not be validated'), 'validation');
+            $validator->validationError($this->name, $error, 'validation');
+
             $logger = Injector::inst()->get(LoggerInterface::class);
             $logger->error(
                 'Turnstile validation failed as request was not successful.'
             );
+
             return false;
         }
 
