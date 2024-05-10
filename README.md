@@ -1,6 +1,6 @@
 Turnstile for Silverstripe
 =================
-Adds a "spam protection" field to SilverStripe userforms using Cloudflare's [Turnstile](https://www.cloudflare.com/lp/turnstile/) service.
+Adds a "spam protection" field to Silverstripe userforms using Cloudflare's [Turnstile](https://www.cloudflare.com/lp/turnstile/) service.
 
 ## Maintainer Contact
 * Ed Chipman ([UndefinedOffset](https://github.com/UndefinedOffset))
