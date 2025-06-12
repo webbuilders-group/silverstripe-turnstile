@@ -7,7 +7,7 @@ Adds a "spam protection" field to Silverstripe userforms using Cloudflare's [Tur
 
 ## Requirements
 * [Silverstripe Framework](https://github.com/silverstripe/silverstripe-framework) ^6
-* [silverstripe/spamprotection](https://github.com/silverstripe/silverstripe-spamprotection) >=3.0 <6.0
+* [silverstripe/spamprotection](https://github.com/silverstripe/silverstripe-spamprotection) ~5.0
 
 
 ## Installation
