@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Forms\FormField;
 use SilverStripe\View\Requirements;
 
@@ -195,22 +196,24 @@ class TurnstileField extends FormField
     }
     /**
      * Validates the captcha against the Recaptcha API
-     * @param Validator $validator Validator to send errors to
-     * @return bool Returns boolean true if valid false if not
+     * @return ValidationResult Returns boolean result and optional error messages
      */
-    public function validate($validator)
+    public function validate(): ValidationResult
     {
         $request = Controller::curr()->getRequest();
         $turnstileResponse = $request->requestVar('cf-turnstile-response');
+        $result = new ValidationResult();
 
         if (!isset($turnstileResponse)) {
-            $validator->validationError(
-                $this->name,
-                _t(TurnstileField::class . '.NOSCRIPT', '_"You must enable JavaScript to submit this form'),
-                'validation'
+            $result->addError(
+                _t(
+                    TurnstileField::class . '.NOSCRIPT',
+                    '_"You must enable JavaScript to submit this form'
+                ),
+                ValidationResult::TYPE_ERROR,
             );
 
-            return false;
+            return $result;
         }
 
 
@@ -223,23 +226,29 @@ class TurnstileField extends FormField
                     $error .= ' '.implode(' ', $response['error-codes']);
                 }
 
-                $validator->validationError($this->name, $error, 'validation');
+                $result->addError(
+                    $error,
+                    ValidationResult::TYPE_ERROR,
+                );
 
-                return false;
+                return $result;
             }
         } else {
-            $validator->validationError($this->name, $error, 'validation');
+            $result->addError(
+                $error,
+                ValidationResult::TYPE_ERROR,
+            );
 
             $logger = Injector::inst()->get(LoggerInterface::class);
             $logger->error(
                 'Turnstile validation failed as request was not successful.'
             );
 
-            return false;
+            return $result;
         }
 
 
-        return true;
+        return $result;
     }
 
     /**
