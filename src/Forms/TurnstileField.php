@@ -9,6 +9,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Forms\FormField;
 use SilverStripe\View\Requirements;
+use InvalidArgumentException;
 
 class TurnstileField extends FormField
 {
@@ -103,10 +104,9 @@ class TurnstileField extends FormField
         $secretKey = Injector::inst()->convertServiceProperty($this->config()->secret_key);
 
         if (empty($siteKey) || empty($secretKey)) {
-            user_error(
+            throw new InvalidArgumentException(
                 'You must configure ' . TurnstileField::class . '.site_key and '
                 . TurnstileField::class . '.secret_key, you can retrieve these at https://dash.cloudflare.com/?to=/:account/turnstile',
-                E_USER_ERROR
             );
         }
 
@@ -141,19 +141,18 @@ class TurnstileField extends FormField
         );
     }
 
-    public function getVerifyResponse()
+    /**
+     * Gets the verifiy response from cloudflare's api
+     * @return array
+     */
+    protected function getVerifyResponse()
     {
-        if($this->verifyResponse) {
-            return  $this->verifyResponse;
+        if ($this->verifyResponse) {
+            return $this->verifyResponse;
         }
 
         $request = Controller::curr()->getRequest();
         $turnstileResponse = $request->requestVar('cf-turnstile-response');
-
-        if (!function_exists('curl_init')) {
-            user_error('You must enable php-curl to use this field', E_USER_ERROR);
-            return false;
-        }
 
         $secret_key = Injector::inst()->convertServiceProperty($this->config()->secret_key);
         $url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
