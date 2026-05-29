@@ -113,7 +113,7 @@ class TurnstileField extends FormField
 
         if (!$this->config()->disable_js) {
             Requirements::javascript(
-                'https://challenges.cloudflare.com/turnstile/v0/api.js?'
+                'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
                     . ($this->config()->js_onload_callback ? '&onload=' . $this->config()->js_onload_callback : ''),
                 [
                 'async' => true,
