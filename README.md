@@ -61,3 +61,6 @@ $form->enableSpamProtection()
           ->setAttribute('data-error-callback', 'youErrorJSCallback')
           ->setAttribute('data-tabindex', 0);
 ```
+
+## Testing scenarios
+Several [dummy site and secret keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/#test-sitekeys) are available to help you test different scenarios. Choosing a visible challenge will let you style the widget during development.
