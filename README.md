@@ -17,7 +17,7 @@ composer require webbuilders-group/silverstripe-turnstile
 
 
 ## Configuration
-There are multiple configuration options for the field, you must set the site_key and the secret_key which you can get from [Cloudflare](https://www.cloudflare.com/lp/turnstile/). These configuration options must be added to your site's yaml config typically this is `app/\_config/config.yml`.
+There are multiple configuration options for the field, you must set the site_key and the secret_key which you can get from [Cloudflare](https://www.cloudflare.com/lp/turnstile/). These configuration options must be added to your site's yaml config typically this is `app/_config/config.yml`.
 
 ```yml
 SilverStripe\SpamProtection\Extension\FormSpamProtectionExtension:
